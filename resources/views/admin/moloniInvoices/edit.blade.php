@@ -104,8 +104,9 @@
                     Referencias
                 </div>
                 <div class="card-body">
-
+                    <div id="referencias-table-container"></div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -220,6 +221,61 @@
                 .finally(() => {
                     button.disabled = false;
                     button.textContent = 'Converter fatura';
+                });
+        });
+    </script>
+    <script>
+        document.getElementById('btn-capturar').addEventListener('click', function() {
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = 'A processar com IA...';
+
+            fetch("{{ route('admin.moloni-invoices.generate-references', $moloniInvoice->id) }}", {
+                    method: "POST",
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success || !Array.isArray(data.referencias)) {
+                        alert("Não foi possível gerar referências com a IA.");
+                        return;
+                    }
+
+                    let html = `<table class="table table-bordered table-sm">
+            <thead>
+                <tr>
+                    <th>Fornecedor</th>
+                    <th>Fatura</th>
+                    <th>Referência</th>
+                    <th>Nome</th>
+                    <th>Qtd.</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+                    data.referencias.forEach((item, index) => {
+                        html += `
+                <tr data-index="${index}">
+                    <td contenteditable="true">${item.fornecedor}</td>
+                    <td contenteditable="true">${item.fatura}</td>
+                    <td contenteditable="true">${item.referencia}</td>
+                    <td contenteditable="true">${item.nome}</td>
+                    <td contenteditable="true">${item.quantidade}</td>
+                    <td><button class="btn btn-sm btn-danger btn-remover-linha">Eliminar</button></td>
+                </tr>`;
+                    });
+
+                    html += `</tbody></table>`;
+                    document.getElementById('referencias-table-container').innerHTML = html;
+                })
+                .catch(() => alert("Erro ao comunicar com o servidor."))
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Capturar códigos';
                 });
         });
     </script>

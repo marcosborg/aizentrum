@@ -135,6 +135,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('moloni-invoices/ckmedia', 'MoloniInvoiceController@storeCKEditorImages')->name('moloni-invoices.storeCKEditorImages');
     Route::resource('moloni-invoices', 'MoloniInvoiceController');
     Route::post('moloni-invoices/{moloniInvoice}/process-ocr', 'MoloniNewInvoiceController@processOcr')->name('moloni-new-invoices.process-ocr');
+    Route::post('moloni-invoices/{moloniInvoice}/generate-references', 'MoloniNewInvoiceController@generateReferences')->name('moloni-invoices.generate-references');
+
 
 
     // Moloni Item
