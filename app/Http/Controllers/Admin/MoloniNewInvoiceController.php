@@ -10,6 +10,14 @@ use OpenAI\Laravel\Facades\OpenAI;
 
 class MoloniNewInvoiceController extends Controller
 {
+
+    public function index()
+    {
+        // Podes retornar uma view ou redirecionar, dependendo do teu objetivo
+        return view('admin.moloniNewInvoices.index');
+    }
+
+
     public function processOcr(MoloniInvoice $moloniInvoice)
     {
         try {
@@ -75,69 +83,69 @@ class MoloniNewInvoiceController extends Controller
     }
 
     public function generateReferences(MoloniInvoice $moloniInvoice)
-{
-    try {
-        if (empty($moloniInvoice->ocr)) {
-            return response()->json([
-                'success' => false,
-                'message' => '[IA] O conteúdo OCR está vazio. Processa o OCR primeiro.'
-            ]);
-        }
+    {
+        try {
+            if (empty($moloniInvoice->ocr)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '[IA] O conteúdo OCR está vazio. Processa o OCR primeiro.'
+                ]);
+            }
 
-        $prompt = <<<EOT
+            $prompt = <<<EOT
 Tens abaixo o conteúdo extraído por OCR de uma fatura.  
 Gera uma lista em JSON com os seguintes campos por linha:
 - fornecedor (usa exatamente "{$moloniInvoice->supplier}")
 - fatura (usa exatamente "{$moloniInvoice->invoice}")
-- referencia (ex: "9Y0907253C", "PAA698151", etc.)
-- nome (ex: "1 conj. past. de travão", "Bateria", etc.)
+- referencia (por ex: "9Y0907253C", "PAA698151", etc.)
+- nome (por ex: "1 conj. past. de travão", "Bateria", etc.)
 - quantidade (valor numérico)
+- preco (valor numérico ou null se não estiver indicado)
 
-Se a referência não existir, usa null. Não uses "undefined".
-Mantém a ordem dos itens conforme aparecem no texto.
+Se a referência não existir, usa null (não coloques "undefined").
+Tenta manter a ordem dos itens conforme aparecem no texto.
 
 Texto OCR:
 \"\"\"{$moloniInvoice->ocr}\"\"\"
 EOT;
 
-        $response = OpenAI::chat()->create([
-            'model' => 'gpt-4',
-            'messages' => [
-                ['role' => 'system', 'content' => 'És um assistente de faturação que extrai tabelas de faturas em português.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-            'temperature' => 0.2,
-        ]);
+            $response = OpenAI::chat()->create([
+                'model' => 'gpt-4',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'És um assistente de faturação que extrai tabelas de faturas em português.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                'temperature' => 0.2,
+            ]);
 
-        $content = $response->choices[0]->message->content ?? '';
+            $content = $response->choices[0]->message->content ?? '';
 
-        // Log de resposta bruta
-        \Log::debug('[IA] Conteúdo devolvido pela IA:', ['raw' => $content]);
+            // Log de resposta bruta
+            \Log::debug('[IA] Conteúdo devolvido pela IA:', ['raw' => $content]);
 
-        // Limpar blocos de código ```json
-        $cleanContent = trim($content);
-        $cleanContent = preg_replace('/^```(?:json)?|```$/', '', $cleanContent);
+            // Limpar blocos de código ```json
+            $cleanContent = trim($content);
+            $cleanContent = preg_replace('/^```(?:json)?|```$/', '', $cleanContent);
 
-        $json = json_decode($cleanContent, true);
+            $json = json_decode($cleanContent, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE || !is_array($json)) {
+            if (json_last_error() !== JSON_ERROR_NONE || !is_array($json)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '[IA] JSON inválido',
+                    'raw' => $cleanContent
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'referencias' => $json // <- nome correto esperado pelo JS
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => '[IA] JSON inválido',
-                'raw' => $cleanContent
+                'message' => '[IA] Erro ao gerar referências: ' . $e->getMessage()
             ]);
         }
-
-        return response()->json([
-            'success' => true,
-            'referencias' => $json // <- nome correto esperado pelo JS
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => '[IA] Erro ao gerar referências: ' . $e->getMessage()
-        ]);
     }
-}
-
 }

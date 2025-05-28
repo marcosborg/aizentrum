@@ -142,4 +142,39 @@ class MoloniItemController extends Controller
 
         return response(null, Response::HTTP_NO_CONTENT);
     }
+
+    public function storeMultiple(Request $request, MoloniInvoice $moloniInvoice)
+    {
+        try {
+            $referencias = $request->input('referencias', []);
+
+            if (empty($referencias)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nenhuma referência recebida.'
+                ]);
+            }
+
+            foreach ($referencias as $ref) {
+                MoloniItem::create([
+                    'moloni_invoice_id' => $moloniInvoice->id,
+                    'suplier'           => $ref['fornecedor'] ?? '',
+                    'reference'         => $ref['referencia'] ?? '',
+                    'name'              => $ref['nome'] ?? '',
+                    'qty'               => $ref['quantidade'] ?? 1,
+                    'price'             => 0,
+                    'synced'            => 0,
+                ]);
+            }
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            \Log::error('[MoloniItemController@storeMultiple] Erro: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao guardar referências: ' . $e->getMessage()
+            ]);
+        }
+    }
 }

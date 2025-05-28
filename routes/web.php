@@ -140,6 +140,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
 
     // Moloni Item
+    Route::post('moloni-invoices/{moloniInvoice}/store-items', 'MoloniItemController@storeMultiple')->name('moloni-items.store-multiple');
+
     Route::delete('moloni-items/destroy', 'MoloniItemController@massDestroy')->name('moloni-items.massDestroy');
     Route::resource('moloni-items', 'MoloniItemController');
 

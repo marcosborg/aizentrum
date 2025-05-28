@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('content')
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-header">
                     {{ trans('global.edit') }} {{ trans('cruds.moloniInvoice.title_singular') }}
@@ -98,7 +98,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
                     Referencias
@@ -245,38 +245,93 @@
                     }
 
                     let html = `<table class="table table-bordered table-sm">
-            <thead>
-                <tr>
-                    <th>Fornecedor</th>
-                    <th>Fatura</th>
-                    <th>Referência</th>
-                    <th>Nome</th>
-                    <th>Qtd.</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>`;
+<thead>
+    <tr>
+        <th>Fornecedor</th>
+        <th>Fatura</th>
+        <th>Referência</th>
+        <th>Nome</th>
+        <th>Qtd.</th>
+        <th>Preço</th>
+        <th></th>
+    </tr>
+</thead>
+<tbody>`;
+
 
                     data.referencias.forEach((item, index) => {
                         html += `
-                <tr data-index="${index}">
-                    <td contenteditable="true">${item.fornecedor}</td>
-                    <td contenteditable="true">${item.fatura}</td>
-                    <td contenteditable="true">${item.referencia}</td>
-                    <td contenteditable="true">${item.nome}</td>
-                    <td contenteditable="true">${item.quantidade}</td>
-                    <td><button class="btn btn-sm btn-danger btn-remover-linha">Eliminar</button></td>
-                </tr>`;
+<tr data-index="${index}">
+    <td contenteditable="true">${item.fornecedor}</td>
+    <td contenteditable="true">${item.fatura}</td>
+    <td contenteditable="true">${item.referencia}</td>
+    <td contenteditable="true">${item.nome}</td>
+    <td contenteditable="true">${item.quantidade}</td>
+    <td contenteditable="true">${item.preco ?? ''}</td>
+    <td><button class="btn btn-sm btn-danger btn-remover-linha">Eliminar</button></td>
+</tr>`;
                     });
 
-                    html += `</tbody></table>`;
+                    html += `</tbody></table>
+    <button id="btn-gravar-referencias" class="btn btn-success btn-sm mt-2">Gravar Referências</button>`;
                     document.getElementById('referencias-table-container').innerHTML = html;
+
                 })
                 .catch(() => alert("Erro ao comunicar com o servidor."))
                 .finally(() => {
                     btn.disabled = false;
                     btn.textContent = 'Capturar códigos';
                 });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('click', function(e) {
+            // Guardar referências
+            if (e.target && e.target.id === 'btn-gravar-referencias') {
+                const linhas = document.querySelectorAll('#referencias-table-container table tbody tr');
+                const referencias = [];
+
+                linhas.forEach(linha => {
+                    const tds = linha.querySelectorAll('td');
+                    referencias.push({
+                        fornecedor: tds[0].innerText.trim(),
+                        fatura: tds[1].innerText.trim(),
+                        referencia: tds[2].innerText.trim(),
+                        nome: tds[3].innerText.trim(),
+                        quantidade: tds[4].innerText.trim(),
+                        preco: tds[5].innerText.trim()
+                    });
+                });
+
+                fetch("{{ route('admin.moloni-items.store-multiple', $moloniInvoice->id) }}", {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            referencias
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href="/admin/moloni-items";
+                        } else {
+                            alert("Erro ao guardar: " + (data.message || 'Erro desconhecido.'));
+                        }
+                    })
+                    .catch(() => alert("Erro ao comunicar com o servidor."));
+            }
+
+            // Eliminar linha
+            if (e.target && e.target.classList.contains('btn-remover-linha')) {
+                const row = e.target.closest('tr');
+                if (row) {
+                    row.remove();
+                }
+            }
         });
     </script>
 @endsection
