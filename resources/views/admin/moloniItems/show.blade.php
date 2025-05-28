@@ -33,6 +33,22 @@
                     </tr>
                     <tr>
                         <th>
+                            {{ trans('cruds.moloniItem.fields.suplier') }}
+                        </th>
+                        <td>
+                            {{ $moloniItem->suplier }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.moloniItem.fields.reference') }}
+                        </th>
+                        <td>
+                            {{ $moloniItem->reference }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
                             {{ trans('cruds.moloniItem.fields.name') }}
                         </th>
                         <td>
@@ -49,10 +65,18 @@
                     </tr>
                     <tr>
                         <th>
-                            {{ trans('cruds.moloniItem.fields.handled') }}
+                            {{ trans('cruds.moloniItem.fields.price') }}
                         </th>
                         <td>
-                            <input type="checkbox" disabled="disabled" {{ $moloniItem->handled ? 'checked' : '' }}>
+                            {{ $moloniItem->price }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.moloniItem.fields.synced') }}
+                        </th>
+                        <td>
+                            <input type="checkbox" disabled="disabled" {{ $moloniItem->synced ? 'checked' : '' }}>
                         </td>
                     </tr>
                 </tbody>

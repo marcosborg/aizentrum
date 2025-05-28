@@ -21,9 +21,12 @@ class MoloniItem extends Model
 
     protected $fillable = [
         'moloni_invoice_id',
+        'suplier',
+        'reference',
         'name',
         'qty',
-        'handled',
+        'price',
+        'synced',
         'created_at',
         'updated_at',
         'deleted_at',

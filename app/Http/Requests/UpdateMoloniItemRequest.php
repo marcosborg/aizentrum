@@ -21,6 +21,14 @@ class UpdateMoloniItemRequest extends FormRequest
                 'required',
                 'integer',
             ],
+            'suplier' => [
+                'string',
+                'required',
+            ],
+            'reference' => [
+                'string',
+                'required',
+            ],
             'name' => [
                 'string',
                 'required',
@@ -30,6 +38,9 @@ class UpdateMoloniItemRequest extends FormRequest
                 'integer',
                 'min:-2147483648',
                 'max:2147483647',
+            ],
+            'price' => [
+                'required',
             ],
         ];
     }

@@ -51,17 +51,26 @@ class MoloniItemController extends Controller
             $table->editColumn('moloni_invoice.invoice', function ($row) {
                 return $row->moloni_invoice ? (is_string($row->moloni_invoice) ? $row->moloni_invoice : $row->moloni_invoice->invoice) : '';
             });
+            $table->editColumn('suplier', function ($row) {
+                return $row->suplier ? $row->suplier : '';
+            });
+            $table->editColumn('reference', function ($row) {
+                return $row->reference ? $row->reference : '';
+            });
             $table->editColumn('name', function ($row) {
                 return $row->name ? $row->name : '';
             });
             $table->editColumn('qty', function ($row) {
                 return $row->qty ? $row->qty : '';
             });
-            $table->editColumn('handled', function ($row) {
-                return '<input type="checkbox" disabled ' . ($row->handled ? 'checked' : null) . '>';
+            $table->editColumn('price', function ($row) {
+                return $row->price ? $row->price : '';
+            });
+            $table->editColumn('synced', function ($row) {
+                return '<input type="checkbox" disabled ' . ($row->synced ? 'checked' : null) . '>';
             });
 
-            $table->rawColumns(['actions', 'placeholder', 'moloni_invoice', 'handled']);
+            $table->rawColumns(['actions', 'placeholder', 'moloni_invoice', 'synced']);
 
             return $table->make(true);
         }

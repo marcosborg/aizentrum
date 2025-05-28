@@ -31,13 +31,22 @@
                         {{ trans('cruds.moloniInvoice.fields.invoice') }}
                     </th>
                     <th>
+                        {{ trans('cruds.moloniItem.fields.suplier') }}
+                    </th>
+                    <th>
+                        {{ trans('cruds.moloniItem.fields.reference') }}
+                    </th>
+                    <th>
                         {{ trans('cruds.moloniItem.fields.name') }}
                     </th>
                     <th>
                         {{ trans('cruds.moloniItem.fields.qty') }}
                     </th>
                     <th>
-                        {{ trans('cruds.moloniItem.fields.handled') }}
+                        {{ trans('cruds.moloniItem.fields.price') }}
+                    </th>
+                    <th>
+                        {{ trans('cruds.moloniItem.fields.synced') }}
                     </th>
                     <th>
                         &nbsp;
@@ -58,6 +67,15 @@
                         </select>
                     </td>
                     <td>
+                    </td>
+                    <td>
+                        <input class="search" type="text" placeholder="{{ trans('global.search') }}">
+                    </td>
+                    <td>
+                        <input class="search" type="text" placeholder="{{ trans('global.search') }}">
+                    </td>
+                    <td>
+                        <input class="search" type="text" placeholder="{{ trans('global.search') }}">
                     </td>
                     <td>
                         <input class="search" type="text" placeholder="{{ trans('global.search') }}">
@@ -125,9 +143,12 @@
 { data: 'id', name: 'id' },
 { data: 'moloni_invoice_invoice', name: 'moloni_invoice.invoice' },
 { data: 'moloni_invoice.invoice', name: 'moloni_invoice.invoice' },
+{ data: 'suplier', name: 'suplier' },
+{ data: 'reference', name: 'reference' },
 { data: 'name', name: 'name' },
 { data: 'qty', name: 'qty' },
-{ data: 'handled', name: 'handled' },
+{ data: 'price', name: 'price' },
+{ data: 'synced', name: 'synced' },
 { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
     orderCellsTop: true,
