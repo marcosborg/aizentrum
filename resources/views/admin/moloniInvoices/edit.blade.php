@@ -300,8 +300,9 @@
                         referencia: tds[2].innerText.trim(),
                         nome: tds[3].innerText.trim(),
                         quantidade: tds[4].innerText.trim(),
-                        preco: tds[5].innerText.trim()
+                        price: tds[5].innerText.trim() // nome correto
                     });
+
                 });
 
                 fetch("{{ route('admin.moloni-items.store-multiple', $moloniInvoice->id) }}", {
@@ -317,7 +318,7 @@
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
-                            window.location.href="/admin/moloni-items";
+                            window.location.href = "/admin/moloni-items";
                         } else {
                             alert("Erro ao guardar: " + (data.message || 'Erro desconhecido.'));
                         }
