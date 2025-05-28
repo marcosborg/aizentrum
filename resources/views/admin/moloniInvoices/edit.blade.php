@@ -268,9 +268,18 @@
     <td contenteditable="true">${item.nome}</td>
     <td contenteditable="true">${item.quantidade}</td>
     <td contenteditable="true">${item.preco ?? ''}</td>
+    <td>
+        <select required class="form-control category-select">
+            <option value="">Selecionar categoria</option>
+            <option value="127489">Techniczentrum</option>
+            <option value="127490">Airbagszentrum</option>
+            <option value="343137">Electriczentrum</option>
+        </select>
+    </td>
     <td><button class="btn btn-sm btn-danger btn-remover-linha">Eliminar</button></td>
 </tr>`;
                     });
+
 
                     html += `</tbody></table>
     <button id="btn-gravar-referencias" class="btn btn-success btn-sm mt-2">Gravar Referências</button>`;
@@ -300,10 +309,20 @@
                         referencia: tds[2].innerText.trim(),
                         nome: tds[3].innerText.trim(),
                         quantidade: tds[4].innerText.trim(),
-                        price: tds[5].innerText.trim() // nome correto
+                        price: tds[5].innerText.trim(),
+                        category_id: tds[6].querySelector('select')
+                            .value // obtém o valor do <select>
                     });
 
+
                 });
+
+                const invalido = referencias.some(r => !r.category_id);
+                if (invalido) {
+                    alert("Por favor, selecione uma categoria para todas as linhas.");
+                    return;
+                }
+
 
                 fetch("{{ route('admin.moloni-items.store-multiple', $moloniInvoice->id) }}", {
                         method: "POST",

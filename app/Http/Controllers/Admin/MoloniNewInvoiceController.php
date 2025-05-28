@@ -7,10 +7,13 @@ use App\Models\MoloniInvoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use OpenAI\Laravel\Facades\OpenAI;
+use App\Models\MoloniItem;
+use App\Services\MoloniService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class MoloniNewInvoiceController extends Controller
 {
-
     public function index()
     {
         // Podes retornar uma view ou redirecionar, dependendo do teu objetivo
@@ -148,4 +151,5 @@ EOT;
             ]);
         }
     }
+
 }
