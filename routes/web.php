@@ -152,6 +152,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     // Moloni New Invoice
     Route::get('moloni-new-invoices', 'MoloniNewInvoiceController@index')->name('moloni-new-invoices.index');
 
+    Route::post('moloni-invoices/sync', [MoloniNewInvoiceController::class, 'sync'])->name('moloni-invoices.sync');
+
 });
 
 Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 'middleware' => ['auth']], function () {

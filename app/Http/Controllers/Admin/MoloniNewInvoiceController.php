@@ -14,12 +14,49 @@ use Illuminate\Support\Facades\Storage;
 
 class MoloniNewInvoiceController extends Controller
 {
+
+    protected $moloni;
+
+    public function __construct(MoloniService $moloni)
+    {
+        $this->moloni = $moloni;
+    }
+
     public function index()
     {
-        // Podes retornar uma view ou redirecionar, dependendo do teu objetivo
         return view('admin.moloniNewInvoices.index');
     }
 
+    public function redirectToMoloni()
+    {
+        $url = 'https://api.moloni.pt/v1/authorize/?client_id=' .
+            env('MOLONI_CLIENT_ID') .
+            '&redirect_uri=' . urlencode(env('MOLONI_CALLBACK_URL'));
+
+        return redirect()->away($url);
+    }
+
+    public function moloniCallback(Request $request)
+    {
+        $code = $request->get('code');
+
+        $response = Http::asForm()->post('https://api.moloni.pt/v1/grant/', [
+            'grant_type' => 'authorization_code',
+            'client_id' => env('MOLONI_CLIENT_ID'),
+            'client_secret' => env('MOLONI_CLIENT_SECRET'),
+            'code' => $code,
+            'redirect_uri' => env('MOLONI_CALLBACK_URL'),
+        ]);
+
+        $data = $response->json();
+
+        if (isset($data['access_token'])) {
+            session(['moloni_access_token' => $data['access_token']]);
+            return redirect()->route('admin.dashboard')->with('success', 'Autenticado com sucesso na Moloni!');
+        }
+
+        return redirect()->route('admin.dashboard')->with('error', 'Erro ao autenticar com a Moloni');
+    }
 
     public function processOcr(MoloniInvoice $moloniInvoice)
     {
@@ -109,7 +146,7 @@ Se a referência não existir, usa null (não coloques "undefined").
 Tenta manter a ordem dos itens conforme aparecem no texto.
 
 Texto OCR:
-\"\"\"{$moloniInvoice->ocr}\"\"\"
+"""{$moloniInvoice->ocr}"""
 EOT;
 
             $response = OpenAI::chat()->create([
@@ -123,10 +160,8 @@ EOT;
 
             $content = $response->choices[0]->message->content ?? '';
 
-            // Log de resposta bruta
             \Log::debug('[IA] Conteúdo devolvido pela IA:', ['raw' => $content]);
 
-            // Limpar blocos de código ```json
             $cleanContent = trim($content);
             $cleanContent = preg_replace('/^```(?:json)?|```$/', '', $cleanContent);
 
@@ -142,7 +177,7 @@ EOT;
 
             return response()->json([
                 'success' => true,
-                'referencias' => $json // <- nome correto esperado pelo JS
+                'referencias' => $json
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -152,4 +187,38 @@ EOT;
         }
     }
 
+    public function sync(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        $items = MoloniItem::with('moloni_invoice')->whereIn('id', $ids)->get()->groupBy('moloni_invoice_id');
+
+        foreach ($items as $invoiceId => $group) {
+            $invoice = $group->first()->moloni_invoice;
+
+            try {
+                $supplierId = $this->moloni->getOrCreateSupplier($invoice->supplier);
+                $documentId = $this->moloni->createDocument($supplierId, $invoice->invoice);
+
+                foreach ($group as $item) {
+                    $productId = $this->moloni->getOrCreateProduct($item, env('MOLONI_PRODUCT_CATEGORY_ID'));
+                    $this->moloni->addProductToDocument($documentId, $productId, $item);
+                    $item->update(['synced' => true]);
+                }
+
+                $this->moloni->uploadDocumentFile($documentId, $invoice);
+                $invoice->update(['handled' => true]);
+            } catch (\Exception $e) {
+                Log::error("Erro ao sincronizar fatura {$invoice->id}", [
+                    'erro' => $e->getMessage(),
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => "Erro ao sincronizar fatura ID {$invoice->id}: {$e->getMessage()}"
+                ], 500);
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Faturas sincronizadas com sucesso!']);
+    }
 }

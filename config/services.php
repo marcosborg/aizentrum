@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'moloni' => [
+        'developer_id'   => env('DEVELOPER_ID'),
+        'client_secret'  => env('CLIENT_SECRET'),
+        'company_id'     => env('COMPANY_ID'),
+        'document_set_id' => env('DOCUMENT_SET_ID'),
+    ],
+
 ];
