@@ -6,6 +6,7 @@
             <a class="btn btn-success" href="{{ route('admin.moloni-items.create') }}">
                 {{ trans('global.add') }} {{ trans('cruds.moloniItem.title_singular') }}
             </a>
+
         </div>
     </div>
 @endcan
@@ -129,37 +130,6 @@
     }
   }
   dtButtons.push(deleteButton)
-  let syncButton = {
-    text: 'Sincronizar selecionados com Moloni',
-    className: 'btn-primary',
-    action: function (e, dt, node, config) {
-        const ids = $.map(dt.rows({ selected: true }).data(), function (entry) {
-            return entry.id
-        });
-
-        if (ids.length === 0) {
-            alert('Nenhum item selecionado.');
-            return;
-        }
-
-        if (confirm('Tens a certeza que queres sincronizar estes itens com o Moloni?')) {
-            $.ajax({
-                headers: {'x-csrf-token': _token},
-                method: 'POST',
-                url: "{{ route('admin.moloni-invoices.sync') }}",
-                data: { ids: ids },
-                success: function(response) {
-                    alert(response.message || 'Sincronização concluída.');
-                    location.reload();
-                },
-                error: function() {
-                    alert('Ocorreu um erro durante a sincronização.');
-                }
-            });
-        }
-    }
-}
-dtButtons.push(syncButton)
 
 @endcan
 

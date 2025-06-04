@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\MoloniNewInvoiceController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
 
 Route::redirect('/', '/login');
 
@@ -140,8 +141,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('moloni-invoices/{moloniInvoice}/process-ocr', 'MoloniNewInvoiceController@processOcr')->name('moloni-new-invoices.process-ocr');
     Route::post('moloni-invoices/{moloniInvoice}/generate-references', 'MoloniNewInvoiceController@generateReferences')->name('moloni-invoices.generate-references');
     Route::post('moloni-invoices/sync', [MoloniNewInvoiceController::class, 'sync'])->name('moloni-invoices.sync');
-
-
 
     // Moloni Item
     Route::post('moloni-invoices/{moloniInvoice}/store-items', 'MoloniItemController@storeMultiple')->name('moloni-items.store-multiple');

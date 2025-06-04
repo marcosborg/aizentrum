@@ -7,55 +7,16 @@ use App\Models\MoloniInvoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use OpenAI\Laravel\Facades\OpenAI;
-use App\Models\MoloniItem;
-use App\Services\MoloniService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Traits\Moloni;
 
 class MoloniNewInvoiceController extends Controller
 {
-
-    protected $moloni;
-
-    public function __construct(MoloniService $moloni)
-    {
-        $this->moloni = $moloni;
-    }
+    use Moloni;
 
     public function index()
     {
         return view('admin.moloniNewInvoices.index');
-    }
-
-    public function redirectToMoloni()
-    {
-        $url = 'https://api.moloni.pt/v1/authorize/?client_id=' .
-            env('MOLONI_CLIENT_ID') .
-            '&redirect_uri=' . urlencode(env('MOLONI_CALLBACK_URL'));
-
-        return redirect()->away($url);
-    }
-
-    public function moloniCallback(Request $request)
-    {
-        $code = $request->get('code');
-
-        $response = Http::asForm()->post('https://api.moloni.pt/v1/grant/', [
-            'grant_type' => 'authorization_code',
-            'client_id' => env('MOLONI_CLIENT_ID'),
-            'client_secret' => env('MOLONI_CLIENT_SECRET'),
-            'code' => $code,
-            'redirect_uri' => env('MOLONI_CALLBACK_URL'),
-        ]);
-
-        $data = $response->json();
-
-        if (isset($data['access_token'])) {
-            session(['moloni_access_token' => $data['access_token']]);
-            return redirect()->route('admin.dashboard')->with('success', 'Autenticado com sucesso na Moloni!');
-        }
-
-        return redirect()->route('admin.dashboard')->with('error', 'Erro ao autenticar com a Moloni');
     }
 
     public function processOcr(MoloniInvoice $moloniInvoice)
@@ -189,36 +150,36 @@ EOT;
 
     public function sync(Request $request)
     {
-        $ids = $request->input('ids', []);
+        $resultados = [];
 
-        $items = MoloniItem::with('moloni_invoice')->whereIn('id', $ids)->get()->groupBy('moloni_invoice_id');
+        foreach ($request->ids as $id) {
 
-        foreach ($items as $invoiceId => $group) {
-            $invoice = $group->first()->moloni_invoice;
+            $invoice = MoloniInvoice::with('moloni_items')->findOrFail($id);
 
-            try {
-                $supplierId = $this->moloni->getOrCreateSupplier($invoice->supplier);
-                $documentId = $this->moloni->createDocument($supplierId, $invoice->invoice);
+            $access_token = $this->login()['access_token'];
 
-                foreach ($group as $item) {
-                    $productId = $this->moloni->getOrCreateProduct($item, env('MOLONI_PRODUCT_CATEGORY_ID'));
-                    $this->moloni->addProductToDocument($documentId, $productId, $item);
-                    $item->update(['synced' => true]);
+            $supplier = $this->findSuplier($access_token, $invoice->supplier);
+
+            if (count($supplier) > 0) {
+                $suplier_id = $supplier[0]['supplier_id'];
+                foreach ($invoice->moloni_items as $moloni_item) {
+                    $product = $this->searchByReference($access_token, $moloni_item->reference);
+                    if($product) {
+                        $product = $product[0];
+                        return $product;
+                    } else {
+                        //CRIAR PRODUTO
+                        
+                    }
                 }
-
-                $this->moloni->uploadDocumentFile($documentId, $invoice);
-                $invoice->update(['handled' => true]);
-            } catch (\Exception $e) {
-                Log::error("Erro ao sincronizar fatura {$invoice->id}", [
-                    'erro' => $e->getMessage(),
-                ]);
+            } else {
                 return response()->json([
                     'success' => false,
-                    'message' => "Erro ao sincronizar fatura ID {$invoice->id}: {$e->getMessage()}"
-                ], 500);
+                    'message' => '[Moloni] Fornecedor não encontrado.'
+                ]);
             }
         }
 
-        return response()->json(['success' => true, 'message' => 'Faturas sincronizadas com sucesso!']);
+        return response()->json($resultados);
     }
 }

@@ -51,4 +51,9 @@ class MoloniInvoice extends Model implements HasMedia
     {
         return $this->getMedia('file')->last();
     }
+
+    public function moloni_items()
+    {
+        return $this->hasMany(MoloniItem::class, 'moloni_invoice_id');
+    }
 }

@@ -2,79 +2,84 @@
 
 namespace App\Http\Controllers\Traits;
 
+use App\Models\MoloniItem;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 trait Moloni
 {
 
-    protected $baseUrl = 'https://api.moloni.pt/v1/';
-
-    /**
-     * Faz autenticação na API da Moloni e retorna o token de acesso.
-     *
-     * @return array|null
-     */
-    public function authenticateMoloni()
+    public function login()
     {
-        $this->clientId = env('MOLONI_CLIENT_ID');
-        $this->clientSecret = env('MOLONI_CLIENT_SECRET');
-        $this->username = env('MOLONI_USERNAME');
-        $this->password = env('MOLONI_PASSWORD');
+        $client_id = config('services.moloni.client_id');
+        $client_secret = config('services.moloni.client_secret');
+        $username = config('services.moloni.username');
+        $password = config('services.moloni.password');
 
-        try {
-            $query = http_build_query([
-                'grant_type'    => 'password',
-                'client_id'     => $this->clientId,
-                'client_secret' => $this->clientSecret,
-                'username'      => $this->username,
-                'password'      => $this->password,
-            ]);
+        $curl = curl_init();
 
-            $url = $this->baseUrl . 'grant/?' . $query;
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.moloni.pt/v1/grant/?grant_type=password&client_id=' . $client_id . '&client_secret=' . $client_secret . '&username=' . $username . '&password=' . $password,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+        ));
 
-            // Simular cURL puro: headers mínimos
-            $response = Http::withHeaders([
-                'Accept' => '*/*', // Forçar o comportamento mais simples possível
-            ])->get($url);
+        $response = curl_exec($curl);
 
-            return $response->json();
+        curl_close($curl);
 
-            \Log::error('Moloni Auth Failed', ['response' => $response->body()]);
-            return null;
-        } catch (\Exception $e) {
-            \Log::error('Moloni Auth Exception', ['message' => $e->getMessage()]);
-            return null;
-        }
+        return json_decode($response, true);
     }
 
-    public function refreshMoloniToken($refreshToken)
+    public function findSuplier($access_token, $search)
     {
-        $this->clientId = env('MOLONI_CLIENT_ID');
-        $this->clientSecret = env('MOLONI_CLIENT_SECRET');
 
-        try {
-            $query = http_build_query([
-                'grant_type'    => 'refresh_token',
-                'client_id'     => $this->clientId,
-                'client_secret' => $this->clientSecret,
-                'refresh_token' => $refreshToken,
-            ]);
+        $curl = curl_init();
 
-            $url = $this->baseUrl . 'grant/?' . $query;
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.moloni.pt/v1/suppliers/getBySearch/?access_token=' . $access_token,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => array('company_id' => '13968', 'search' => $search),
+        ));
 
-            $response = Http::withHeaders([
-                'Accept' => '*/*',
-            ])->get($url);
+        $response = curl_exec($curl);
 
-            if ($response->successful()) {
-                return $response->json();
-            }
+        curl_close($curl);
+        return json_decode($response, true);
+    }
 
-            \Log::error('Moloni Token Refresh Failed', ['response' => $response->body()]);
-            return null;
-        } catch (\Exception $e) {
-            \Log::error('Moloni Token Refresh Exception', ['message' => $e->getMessage()]);
-            return null;
-        }
+    public function searchByReference($access_token, $reference)
+    {
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.moloni.pt/v1/products/getBySearch/?access_token=' . $access_token,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => array('company_id' => '13968', 'search' => $reference),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        
+        return json_decode($response, true);
     }
 }

@@ -32,10 +32,13 @@ return [
     ],
 
     'moloni' => [
-        'developer_id'   => env('DEVELOPER_ID'),
-        'client_secret'  => env('CLIENT_SECRET'),
-        'company_id'     => env('COMPANY_ID'),
-        'document_set_id' => env('DOCUMENT_SET_ID'),
+        'client_id' => env('MOLONI_CLIENT_ID'),
+        'client_secret' => env('MOLONI_CLIENT_SECRET'),
+        'username' => env('MOLONI_USERNAME'),
+        'password' => env('MOLONI_PASSWORD'),
+        'company_id' => env('MOLONI_COMPANY_ID'),
+        'api_url' => env('MOLONI_API_URL', 'https://api.moloni.pt/v1'),
     ],
+
 
 ];
