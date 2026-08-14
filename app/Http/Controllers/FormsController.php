@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Jobs\SendFormSubmissionEmail;
 use App\Models\Form;
 use App\Models\FormData;
 use App\Http\Controllers\Traits\Iftech;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Log;
 use \App\Models\FormField;
 
 class FormsController extends Controller
@@ -81,18 +80,7 @@ class FormsController extends Controller
 
         $data = json_encode($form_data);
 
-        $form_data->load('form.project');
-        $form_data->data = json_decode($form_data->data);
-
-        try {
-            Notification::route('mail', config('mail.commercial_address'))
-                ->notify(new \App\Notifications\FormSubmit($form_data));
-        } catch (\Throwable $exception) {
-            Log::error('Public form email delivery failed', [
-                'form_data_id' => $form_data->id,
-                'exception' => $exception,
-            ]);
-        }
+        SendFormSubmissionEmail::dispatch($form_data->id)->afterResponse();
 
         //SEND BY API
 
