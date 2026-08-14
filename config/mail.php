@@ -1,5 +1,13 @@
 <?php
 
+$smtpHost = env('MAIL_HOST', 'smtp.mailgun.org');
+
+// The web application moved to AWS, while email remains on the mail origin.
+// Keep legacy production environments from trying SMTP through the web host.
+if ($smtpHost === 'ai.airbagszentrum.com') {
+    $smtpHost = 'mail.airbagszentrum.com';
+}
+
 return [
 
     /*
@@ -36,7 +44,7 @@ return [
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
-            'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
+            'host' => $smtpHost,
             'port' => env('MAIL_PORT', 587),
             'encryption' => env('MAIL_ENCRYPTION', 'tls'),
             'username' => env('MAIL_USERNAME'),
