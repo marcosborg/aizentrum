@@ -92,10 +92,6 @@ class FormsController extends Controller
                 'form_data_id' => $form_data->id,
                 'exception' => $exception,
             ]);
-
-            return response()->json([
-                'message' => __('Não foi possível enviar o email. Tente novamente mais tarde.'),
-            ], 502);
         }
 
         //SEND BY API
