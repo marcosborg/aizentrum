@@ -108,23 +108,23 @@ class TrainingController extends Controller
 
     public function chatListRunSteps($thread_id, $run_id)
     {
-        return $this->listRunSteps(env('OPENAI_API_KEY'), $thread_id, $run_id);
+        return $this->listRunSteps(config('services.openai.key'), $thread_id, $run_id);
     }
 
     public function getRunStatus($thread_id, $run_id)
     {
-        return $this->retrieveRun(env('OPENAI_API_KEY'), $thread_id, $run_id);
+        return $this->retrieveRun(config('services.openai.key'), $thread_id, $run_id);
     }
 
     public function getMessages($thread_id)
     {
-        return $this->listMessages(env('OPENAI_API_KEY'), $thread_id);
+        return $this->listMessages(config('services.openai.key'), $thread_id);
     }
 
     public function addMessage(Request $request)
     {
 
-        $openaiApiKey = env('OPENAI_API_KEY');
+        $openaiApiKey = config('services.openai.key');
         $thread_id = $request->thread_id;
         $message = $request->message;
 
@@ -134,7 +134,7 @@ class TrainingController extends Controller
     public function runTheThread($assistant_id, $thread_id)
     {
 
-        $openaiApiKey = env('OPENAI_API_KEY');
+        $openaiApiKey = config('services.openai.key');
         $assist_code = Assistant::find($assistant_id)->assist_code;
 
         return $this->createRun($openaiApiKey, $assist_code, $thread_id);
@@ -163,7 +163,7 @@ class TrainingController extends Controller
     public function chatSubmitToolOutputsToRun(Request $request)
     {
 
-        $openaiApiKey = env('OPENAI_API_KEY');
+        $openaiApiKey = config('services.openai.key');
         $thread_id = $request->thread_id;
         $run_id = $request->run_id;
         $tool_call_id = $request->tool_call_id;
