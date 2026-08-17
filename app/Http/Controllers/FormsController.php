@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Jobs\SendFormSubmissionEmail;
 use App\Models\Form;
 use App\Models\FormData;
 use App\Http\Controllers\Traits\Iftech;
@@ -78,6 +79,8 @@ class FormsController extends Controller
         $form_data->save();
 
         $data = json_encode($form_data);
+
+        SendFormSubmissionEmail::dispatch($form_data->id)->afterResponse();
 
         //SEND BY API
 
