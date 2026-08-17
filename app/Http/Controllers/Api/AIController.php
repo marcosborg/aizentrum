@@ -66,8 +66,8 @@ class AIController extends Controller
 
         // Chamada à API da OpenAI
         try {
-            $response = Http::withToken(env('OPENAI_API_KEY'))->post('https://api.openai.com/v1/chat/completions', [
-                'model' => 'gpt-4',
+            $response = Http::withToken(config('services.openai.key'))->post('https://api.openai.com/v1/chat/completions', [
+                'model' => config('services.openai.model', 'gpt-4o-mini'),
                 'messages' => $fullConversation,
                 'temperature' => 0.7,
             ]);
@@ -96,4 +96,3 @@ class AIController extends Controller
         ]);
     }
 }
-
