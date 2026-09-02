@@ -18,6 +18,7 @@ return [
         'upload_drop' => 'Déposez les fichiers ici',
         'upload_browse' => 'ou cliquez pour sélectionner plusieurs fichiers',
         'no_files_selected' => 'Aucun fichier sélectionné',
+        'mileage' => 'Kilométrage',
     ],
     'js' => [
         'terms_required' => 'Vous devez accepter les conditions générales.',

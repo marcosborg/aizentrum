@@ -57,7 +57,9 @@
                     <div class="row">
                         @foreach ($form->form_fields as $form_field)
                         @php
-                            $fieldLabel = data_get(trans('public_forms.fields'), $form_field->id, $form_field->label);
+                            $fieldLabel = $form_field->name === 'kms'
+                                ? trans('public_forms.ui.mileage')
+                                : data_get(trans('public_forms.fields'), $form_field->id, $form_field->label);
                         @endphp
                         <div
                             class="col-md-{{ $form_field->type == 'textarea' || $form_field->type == 'checkbox' ? '12' : '6' }}">

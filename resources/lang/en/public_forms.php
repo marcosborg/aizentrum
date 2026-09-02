@@ -18,6 +18,7 @@ return [
         'upload_drop' => 'Drag files here',
         'upload_browse' => 'or click to select multiple files',
         'no_files_selected' => 'No files selected',
+        'mileage' => 'Mileage',
     ],
     'js' => [
         'terms_required' => 'You must accept the terms and conditions.',
