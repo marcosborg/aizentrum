@@ -258,5 +258,6 @@ return [
         255 => 'Diagnostic upload',
         256 => 'By filling in the form, you agree to our Sales Terms and Conditions, available at www.electriczentrum.com',
         257 => 'Email',
+        258 => 'Mileage',
     ],
 ];

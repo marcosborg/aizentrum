@@ -258,5 +258,6 @@ return [
         255 => 'Téléversement du diagnostic',
         256 => 'En remplissant le formulaire, vous acceptez nos Conditions Générales de Vente, disponibles sur www.electriczentrum.com',
         257 => 'Email',
+        258 => 'Kilométrage',
     ],
 ];

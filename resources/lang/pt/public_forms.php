@@ -258,5 +258,6 @@ return [
         255 => 'Upload de diagnóstico',
         256 => 'Ao preencher o formulário, está a concordar com os nossos Termos e Condições de Venda, presentes na página www.electriczentrum.com',
         257 => 'Email',
+        258 => 'Quilómetros',
     ],
 ];

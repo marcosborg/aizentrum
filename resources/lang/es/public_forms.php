@@ -258,5 +258,6 @@ return [
         255 => 'Subida de diagnóstico',
         256 => 'Al rellenar el formulario, acepta nuestros Términos y Condiciones de Venta, disponibles en www.electriczentrum.com',
         257 => 'Email',
+        258 => 'Kilómetros',
     ],
 ];
